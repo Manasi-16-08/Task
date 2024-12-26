@@ -80,7 +80,7 @@ export function addNumbers(a, b) {
 // (b) Function to return current date in format "Year/Month/Day"
 export function getCurrentDate() {
     const date = new Date();
-    return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
+    return `${date?.getFullYear()()}/${(date?.getMonth() + 1)?.toString().padStart(2, '0')}/${date?.getDate()?.toString().padStart(2, '0')}`;
 }
 
 // 7. Promise handling examples
