@@ -1,7 +1,6 @@
-// index.js
 import axios from 'axios';
-// 1. Function to get all posts from JSONPlaceholder API
 
+// 1. Function to get all posts from JSONPlaceholder API
 async function fetchAllPosts() {
     try {
         const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
@@ -14,30 +13,22 @@ async function fetchAllPosts() {
 // 2. Function to fetch a specific post with ID of 5
 async function fetchPostById(id) {
     try {
-        const response = await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`);
-        const data = await response.json();
-        console.log(data); // Log the specific post
+        const response = await axios.get(`https://jsonplaceholder.typicode.com/posts/${id}`);
+        console.log(response.data); // Log the specific post
     } catch (error) {
         console.error('Error fetching post:', error);
     }
 }
 
-// 3. Function to create a new user with POST request
+// 3. Function to create a new user
 async function createUser() {
     const userData = {
         name: "Imeuswe App",
         email: "imeuswe@example.com"
     };
     try {
-        const response = await fetch('https://jsonplaceholder.typicode.com/users', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData)
-        });
-        const data = await response.json();
-        console.log(data); // Log the created user data
+        const response = await axios.post('https://jsonplaceholder.typicode.com/users', userData);
+        console.log(response.data); // Log the created user data
     } catch (error) {
         console.error('Error creating user:', error);
     }
@@ -46,10 +37,8 @@ async function createUser() {
 // 4. Function to delete a user with ID of 2
 async function deleteUser(userId) {
     try {
-        const response = await fetch(`https://jsonplaceholder.typicode.com/users/${userId}`, {
-            method: 'DELETE'
-        });
-        if (response.ok) {
+        const response = await axios.delete(`https://jsonplaceholder.typicode.com/users/${userId}`);
+        if (response.status === 200) {
             console.log(`User with ID ${userId} deleted successfully.`);
         } else {
             console.error('Error deleting user:', response.statusText);
@@ -62,8 +51,8 @@ async function deleteUser(userId) {
 // 5. Function to filter and map todos for user with ID 1
 async function fetchUserTodos() {
     try {
-        const response = await fetch('https://jsonplaceholder.typicode.com/users/1/todos');
-        const todos = await response.json();
+        const response = await axios.get('https://jsonplaceholder.typicode.com/users/1/todos');
+        const todos = response.data;
 
         // (a) Filter completed todos
         const completedTodos = todos.filter(todo => todo.completed);
@@ -81,7 +70,7 @@ async function fetchUserTodos() {
     }
 }
 
-// 6. Functions for index.js
+// 6. Functions for additional utility
 
 // (a) Function to add two numbers
 export function addNumbers(a, b) {
@@ -97,16 +86,16 @@ export function getCurrentDate() {
 // 7. Promise handling examples
 
 // (a) Using .then .catch
-let r = new Promise((resolve) => { 
-    resolve("Completed"); 
+let r = new Promise((resolve) => {
+    resolve("Completed");
 });
 r.then(value => console.log(value)).catch(error => console.error(error));
 
 // (b) Using async/await and try..catch for error handling
-async function sayHello() { 
-    let promise = new Promise((resolve, reject) => { 
-        setTimeout(() => reject("An error has occurred"), 1000); 
-    }); 
+async function sayHello() {
+    let promise = new Promise((resolve, reject) => {
+        setTimeout(() => reject("An error has occurred"), 1000);
+    });
     try {
         await promise;
     } catch (error) {
@@ -115,13 +104,13 @@ async function sayHello() {
 }
 
 // 8. Optional chaining example
-const product = { 
-    name: 'Smartphone', 
-    details: { 
-        brand: 'XYZ', 
-        color: 'Black' 
-        // price property is missing 
-    } 
+const product = {
+    name: 'Smartphone',
+    details: {
+        brand: 'XYZ',
+        color: 'Black'
+        // price property is missing
+    }
 };
 
 const price = product.details?.price ?? 'Price not available'; // Use optional chaining and nullish coalescing
