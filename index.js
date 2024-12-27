@@ -1,117 +1,156 @@
-import axios from 'axios';
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const connectDB = require('./ConnectDB'); // Make sure to implement this for DB connection
+const StoryModel = require('./models/Story'); // MongoDB schema for Story
+const ChapterModel = require('./models/Chapter'); // MongoDB schema for Chapter
+const UserModel = require('./models/user'); // MongoDB schema for User
 
-// 1. Function to get all posts from JSONPlaceholder API
-async function fetchAllPosts() {
-    try {
-        const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
-        console.log(response.data); // Log the response data
-    } catch (error) {
-        console.error('Error fetching posts:', error);
-    }
-}
+// Initialize express app
+const app = express();
 
-// 2. Function to fetch a specific post with ID of 5
-async function fetchPostById(id) {
-    try {
-        const response = await axios.get(`https://jsonplaceholder.typicode.com/posts/${id}`);
-        console.log(response.data); // Log the specific post
-    } catch (error) {
-        console.error('Error fetching post:', error);
-    }
-}
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
 
-// 3. Function to create a new user
-async function createUser() {
-    const userData = {
-        name: "Imeuswe App",
-        email: "imeuswe@example.com"
-    };
-    try {
-        const response = await axios.post('https://jsonplaceholder.typicode.com/users', userData);
-        console.log(response.data); // Log the created user data
-    } catch (error) {
-        console.error('Error creating user:', error);
-    }
-}
+// Connect to MongoDB
+connectDB();
 
-// 4. Function to delete a user with ID of 2
-async function deleteUser(userId) {
-    try {
-        const response = await axios.delete(`https://jsonplaceholder.typicode.com/users/${userId}`);
-        if (response.status === 200) {
-            console.log(`User with ID ${userId} deleted successfully.`);
-        } else {
-            console.error('Error deleting user:', response.statusText);
-        }
-    } catch (error) {
-        console.error('Error deleting user:', error);
-    }
-}
-
-// 5. Function to filter and map todos for user with ID 1
-async function fetchUserTodos() {
-    try {
-        const response = await axios.get('https://jsonplaceholder.typicode.com/users/1/todos');
-        const todos = response.data;
-
-        // (a) Filter completed todos
-        const completedTodos = todos.filter(todo => todo.completed);
-        console.log('Completed Todos:', completedTodos);
-
-        // (b) Map todos to rename "completed" to "done"
-        const renamedTodos = completedTodos.map(todo => ({
-            ...todo,
-            done: todo.completed,
-            completed: undefined // Remove the old property
-        }));
-        console.log('Renamed Todos:', renamedTodos);
-    } catch (error) {
-        console.error('Error fetching todos:', error);
-    }
-}
-
-// 6. Functions for additional utility
-
-// (a) Function to add two numbers
-export function addNumbers(a, b) {
-    return a + b; // Return the sum of a and b
-}
-
-// (b) Function to return current date in format "Year/Month/Day"
-export function getCurrentDate() {
-    const date = new Date();
-    return `${date?.getFullYear()()}/${(date?.getMonth() + 1)?.toString().padStart(2, '0')}/${date?.getDate()?.toString().padStart(2, '0')}`;
-}
-
-// 7. Promise handling examples
-
-// (a) Using .then .catch
-let r = new Promise((resolve) => {
-    resolve("Completed");
+// Basic Route
+app.get('/', (req, res) => {
+    res.send('Welcome to the Chapter API');
 });
-r.then(value => console.log(value)).catch(error => console.error(error));
 
-// (b) Using async/await and try..catch for error handling
-async function sayHello() {
-    let promise = new Promise((resolve, reject) => {
-        setTimeout(() => reject("An error has occurred"), 1000);
-    });
+// Create a new story
+app.post('/stories', async (req, res) => {
+    const { title, description, userId } = req.body;
+
     try {
-        await promise;
+        const story = new StoryModel({ title, description, userId });
+        await story.save();
+        res.status(201).json(story);
     } catch (error) {
-        console.error(error); // Handle the error here
+        res.status(500).json({ message: 'Error creating story', error });
     }
-}
+});
 
-// 8. Optional chaining example
-const product = {
-    name: 'Smartphone',
-    details: {
-        brand: 'XYZ',
-        color: 'Black'
-        // price property is missing
+// Create a new chapter
+app.post('/chapters', async (req, res) => {
+    const { title, content, userId, storyId } = req.body;
+
+    try {
+        const chapter = new ChapterModel({ title, content, userId, storyId });
+        await chapter.save();
+        res.status(201).json(chapter);
+    } catch (error) {
+        res.status(500).json({ message: 'Error creating chapter', error });
     }
-};
+});
 
-const price = product.details?.price ?? 'Price not available'; // Use optional chaining and nullish coalescing
-console.log(price);
+// Get all stories
+app.get('/stories', async (req, res) => {
+    try {
+        const stories = await StoryModel.find();
+        res.status(200).json(stories);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching stories', error });
+    }
+});
+
+// Get all chapters
+app.get('/chapters', async (req, res) => {
+    try {
+        const chapters = await ChapterModel.find();
+        res.status(200).json(chapters);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching chapters', error });
+    }
+});
+
+// Get a specific story by ID
+app.get('/stories/:id', async (req, res) => {
+    try {
+        const story = await StoryModel.findById(req.params.id);
+        if (!story) {
+            return res.status(404).json({ message: 'Story not found' });
+        }
+        res.status(200).json(story);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching story', error });
+    }
+});
+
+// Get a specific chapter by ID
+app.get('/chapters/:id', async (req, res) => {
+    try {
+        const chapter = await ChapterModel.findById(req.params.id);
+        if (!chapter) {
+            return res.status(404).json({ message: 'Chapter not found' });
+        }
+        res.status(200).json(chapter);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching chapter', error });
+    }
+});
+
+// Update a story
+app.put('/stories/:id', async (req, res) => {
+    const { title, description } = req.body;
+
+    try {
+        const updatedStory = await StoryModel.findByIdAndUpdate(req.params.id, { title, description }, { new: true });
+        if (!updatedStory) {
+            return res.status(404).json({ message: 'Story not found' });
+        }
+        res.status(200).json(updatedStory);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating story', error });
+    }
+});
+
+// Update a chapter
+app.put('/chapters/:id', async (req, res) => {
+    const { title, content } = req.body;
+
+    try {
+        const updatedChapter = await ChapterModel.findByIdAndUpdate(req.params.id, { title, content }, { new: true });
+        if (!updatedChapter) {
+            return res.status(404).json({ message: 'Chapter not found' });
+        }
+        res.status(200).json(updatedChapter);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating chapter', error });
+    }
+});
+
+// Delete a story
+app.delete('/stories/:id', async (req, res) => {
+    try {
+        const deletedStory = await StoryModel.findByIdAndDelete(req.params.id);
+        if (!deletedStory) {
+            return res.status(404).json({ message: 'Story not found' });
+        }
+        res.status(200).json({ message: 'Story deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting story', error });
+    }
+});
+
+// Delete a chapter
+app.delete('/chapters/:id', async (req, res) => {
+    try {
+        const deletedChapter = await ChapterModel.findByIdAndDelete(req.params.id);
+        if (!deletedChapter) {
+            return res.status(404).json({ message: 'Chapter not found' });
+        }
+        res.status(200).json({ message: 'Chapter deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting chapter', error });
+    }
+});
+
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
