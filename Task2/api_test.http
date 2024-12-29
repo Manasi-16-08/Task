@@ -1,0 +1,7 @@
+POST http://localhost:3000/api/chapters
+Content-Type: application/json
+
+{
+  "title": "Introduction",
+  "content": "This is the first chapter."
+  ,"author":"Manasi Tawade"}
