@@ -147,9 +147,6 @@ Task2
 Error: "Could not connect to MongoDB": Ensure MongoDB is running or your MongoDB Atlas cluster is properly set up.
 Error: "400 Bad Request": Ensure you are sending all required fields (title, content, and author) in the request body.
 
-###License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ### Key Sections:
 
