@@ -155,5 +155,3 @@ Error: "400 Bad Request": Ensure you are sending all required fields (title, con
 3. **API Documentation**: Details about the `POST` and `GET` endpoints, with example requests and responses.
 4. **Folder Structure**: A description of the project file organization.
 5. **Troubleshooting**: Some common errors and solutions.
-
-You can copy this content into your `README.md` file. Let me know if you'd like to add or modify any sections!
